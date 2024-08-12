@@ -96,7 +96,7 @@ function actualizarRegistroNotificacion(sheet, rowIndex, fechaActual, contador, 
 function calcularTiempoTranscurrido(fechaAnterior, fechaVerificacion) {
     var diferencia = fechaVerificacion.getTime() - fechaAnterior.getTime();
     var diasTranscurridos = diferencia / (1000 * 60 * 60 * 24);
-    return diasTranscurridos >= 7; // 5 días para todas las notificaciones
+    return diasTranscurridos >= 7; // 7 días para todas las notificaciones
 }
 
 
@@ -116,7 +116,7 @@ function crearDisparadorDiario() {
         .timeBased()
         .everyDays(1)
         .atHour(5)
-        .nearMinute(00)
+        .nearMinute(0)
         .create();
     console.log("Disparador diario creado exitosamente para ejecutarse a las 5:00 a.m.");
 }

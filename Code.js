@@ -166,8 +166,6 @@ function formatSolicitudesPorEmail(email) {
 
 // Función para cargar las solicitudes hechas por el usuario logueado 
 function cargarSolicitudesUsuarioPorEmail(email) {
-  //var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("index");
-  //var data = sheet.getDataRange().getValues();
 
   var data = obtenerDatos("index");
   var solicitudes = [];
@@ -1404,13 +1402,3 @@ function transformarData(data) {
   };
   return formatSolicitante;
 }
-
-
-
-
-
-
-
-
-
-

@@ -291,8 +291,11 @@ function uploadFiles(form) {
   //var ss = SpreadsheetApp.getActiveSpreadsheet();
   //var sheetRegistro = ss.getSheetByName("index");
   //var sheetRegistro = obtenerDatos("index");
+  console.log("Entra a la función uploadFiles");
+
 
   var sheetRegistro = conectarHoja("index");
+  console.log("Hoja de registro: " + sheetRegistro);
 
   // Verificar si el usuario está logueado
   var userId = form.loggedUser ? form.loggedUser : null;
@@ -301,6 +304,7 @@ function uploadFiles(form) {
   }
 
   var solicitantes = cargarDataUsers(userId);
+  console.log("Solicitantes en la función cargarDataUsers: " + solicitantes);
   if (!solicitantes) {
     return "ERROR: No se encontró al usuario en la base de datos.";
   }
@@ -308,9 +312,13 @@ function uploadFiles(form) {
   var formatSolicitante = transformarData(solicitantes);
   var solicitudId = generarSolicitudId(sheetRegistro);
 
+  console.log("Solicitud ID en la función formatSolicitante: " + formatSolicitante);
+  console.log("LLama a la función generarSolicitudId : " + solicitudId);
+
   var cotizacionUrl;
   try {
     cotizacionUrl = guardaCotizacionEnDrive(form, solicitudId);
+    console.log("LLama a la función guardaCotizacionEnDrive : " + cotizacionUrl);
   } catch (error) {
     return "ERROR: No se pudo guardar la cotización. " + error.message;
   }
@@ -318,6 +326,7 @@ function uploadFiles(form) {
   var totalCompra;
   try {
     totalCompra = registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, formatSolicitante);
+    console.log("LLama a la función registrarProductos : " + totalCompra);
   } catch (error) {
     return "ERROR: No se pudieron registrar los productos. " + error.message;
   }
@@ -326,11 +335,13 @@ function uploadFiles(form) {
   console.log(""); 
 
   try {
-    enviarEmail(totalCompra, solicitudId, formatSolicitante, false);
+    var enviarMail =  enviarEmail(totalCompra, solicitudId, formatSolicitante, false);
+    console.log("LLama a la función enviarEmail : " + enviarMail ) ; 
   } catch (error) {
     return "ERROR: No se pudo enviar el email. " + error.message;
   }
 
+  console.log("Tu solicitud de compra se envió correctamente");
   return "Tu solicitud de compra se envió correctamente";
 }
 

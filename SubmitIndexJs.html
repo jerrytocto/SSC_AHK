@@ -3,6 +3,8 @@
     // Acción evita que se muestre una hoja en blanco al enviar el formulario
     event.preventDefault();
 
+    console.log(form);
+    console.log(JSON.stringify(form, null, 2));
     const button = document.getElementById("btn-submit");
     const modalMessage = document.getElementById("modalMessage");
     const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));

@@ -557,9 +557,16 @@
       document.getElementById("productSpecs").value += `${productSpecs},`;
       document.getElementById("productCentroCostos").value += `${productCentroCostos},`;
 
+      console.log(newRow);
+
+      console.log(productBrand.value);
+      console.log(productName.value);
+
       // Limpiar los campos del modal
       clearProductModal();
 
+      console.log(productBrand.value);
+      console.log(productName.value);
       // Ocultar el modal
       const addProductModal = document.getElementById('addProductModal');
       const modal = bootstrap.Modal.getInstance(addProductModal);
@@ -570,6 +577,7 @@
   });
 
   function clearProductModal() {
+    console.log("Limpiando campos del modal");
     document.getElementById("productNameModal").value = '';
     document.getElementById("productBrandModal").value = '';
     document.getElementById("productQuantityModal").value = '';

@@ -224,12 +224,19 @@
             Credenciales incorrectas.
           </div>
         </div>
+
+        <!-- Pie de página con el texto "Development by JerryDev" -->
+        <div class="text-center">
+          <small class="text-muted">
+            Development by JerryDev
+          </small>
+        </div>
       </div>
 
       <!-- Navbar (oculto inicialmente) -->
       <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style="display: none;">
         <div class="container-fluid">
-          <h3 class="navbar-brand" >Sistema de Solicitudes</h3>
+          <h3 class="navbar-brand">Sistema de Solicitud de Compra</h3>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -237,10 +244,12 @@
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
-                <a id="home-link" class="nav-link active" aria-current="page" href="#">Inicio</a>
+                <!--<a id="home-link" class="nav-link active" aria-current="page" href="#">Mis Solicitudes</a>-->
+                <a id="home-link" class="nav-link active" aria-current="page" href="#" style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px; text-decoration: none; display: inline-block; margin-right: 10px;">Mis Solicitudes</a>
               </li>
               <li class="nav-item">
-                <button id="request-button" class="btn btn-primary" style="display: none;">Realizar solicitud</button>
+                <!--<button id="request-button" class="btn" style="display: none; background-color: #fff; color: #000; border: 1px solid #ccc;">Nueva Solicitud</button>-->
+                <button id="request-button" class="btn" style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px;">Nueva Solicitud</button>
               </li>
             </ul>
             <div class="dropdown">
@@ -289,16 +298,20 @@
       <div id="form-container" class="card mt-3" style="display: none;">
         <!-- FORMULARIO DE SOLICITUD DE COMPRA  -->
         <div class="container">
-          <h3 class="text-center"> Solicitud de compra</h3>
+          <h4 class="text-center"> Nueva Solicitud de Compra</h4>
           <form onsubmit="enviarform(event, this)">
             <div class="row">
               <div class="col-md-3">
                 <label for="razonCompra" class="form-label">Razón para la compra *</label>
                 <select id="razonCompra" class="form-select" name="razonCompra" required>
-                  <option selected>Comercial</option>
-                  <option>Operacional</option>
-                  <option>Ssoma</option>
-                  <option>Administrativa</option>
+                  <option>Gerencia</option>
+                  <option>Areas_de_Soporte</option>
+                  <option>Supervision_Lima</option>
+                  <option>Supervision_Matarani</option>
+                  <option>Supervision_Ilo</option>
+                  <option>Supervision_AAQ</option>
+                  <option>Agri</option>
+                  <option>Laboratorio</option>
                 </select>
               </div>
 
@@ -441,7 +454,7 @@
               <input type="number" class="form-control" id="productQuantityModal" required>
             </div>
             <div class="col-md-6">
-              <label for="productPriceModal" class="form-label">Precio *</label>
+              <label for="productPriceModal" class="form-label">Precio ($) *</label>
               <input type="number" class="form-control" id="productPriceModal" required>
             </div>
           </div>

@@ -379,6 +379,8 @@ function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, for
   var fechaRegistro = new Date();
   var totalCompra = 0;
   var productos = obtenerDatosProductos(form);
+  console.log("Productos en la función registrarProductos: " + productos);
+  console.log(JSON.stringify(productos, null, 2));
 
   var observaciones = form.observaciones ? form.observaciones : "";
 
@@ -469,12 +471,20 @@ function obtenerColumnaEstado(totalCompra, solicitudId, numberAprobadores) {
 
 // Extrae los datos de los productos del evento POST
 function obtenerDatosProductos(form) {
+
   var nombres = limpiarCadena(form["productNames[]"]).split(",");
   var marcas = limpiarCadena(form["productBrands[]"]).split(",");
   var cantidades = limpiarCadena(form["productQuantities[]"]).split(",");
   var precios = limpiarCadena(form["productPrices[]"]).split(",");
   var especificaciones = limpiarCadena(form["productSpecs[]"]).split(",");
-  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split(",");
+  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split(","); 
+
+  /*const nombres = limpiarCadena(document.getElementById("productNames").value.split(","));
+  const marcas = limpiarCadena(document.getElementById("productBrands").value.split(","));
+  const cantidades = limpiarCadena(document.getElementById("productQuantities").value.split(","));
+  const precios = limpiarCadena(document.getElementById("productPrices").value.split(","));
+  const especificaciones = limpiarCadena(document.getElementById("productSpecs").value.split(","));
+  const centroCostos = limpiarCadena(document.getElementById("productCentroCostos").value.split(",")); */
 
   return nombres.map((nombre, i) => ({
     nombre: nombre,
@@ -486,6 +496,9 @@ function obtenerDatosProductos(form) {
   }));
 }
 function limpiarCadena(cadena) {
+  if(cadena == undefined || cadena == null){
+    return "";
+  }
   return cadena.replace(/,\s*$/, "");
 }
 

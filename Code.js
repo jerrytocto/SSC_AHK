@@ -26,7 +26,7 @@ function doGet(e) {
 
   // Obtener el email de la persona que está aprobando la solicitud 
   var userEmail = Session.getActiveUser().getEmail();
-  console.log("User Email in the function doGet: "+ userEmail);
+  console.log("User Email in the function doGet: " + userEmail);
 
   // obteniendo el id de la solicitud
   var filterData = obtenerUltimosRegistros(e.parameter.solicitudId);
@@ -70,7 +70,7 @@ function doGet(e) {
     //  return HtmlService.createHtmlOutput('No tienes permiso para realizar esta actividad, por favor contacta al área de IT para más información.');
     //}
     // Envía como parámetros el objeto e y la URL de la cotización
-    console.log("Resultado de isUserAuthorized: "+ isUserAuthorized(userEmail));
+    console.log("Resultado de isUserAuthorized: " + isUserAuthorized(userEmail));
     return handleEstadoRequest(e, filterData[0][21]);
 
   }
@@ -85,7 +85,7 @@ function isUserAuthorized(email) {
   //var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Usuarios_Autorizados');
   //var data = sheet.getDataRange().getValues();
   var data = obtenerDatos("users");
-  console.log("Listado de usuarios isUserAuthorized: "+ data);
+  console.log("Listado de usuarios isUserAuthorized: " + data);
   return data.some(row => row[2].toLowerCase() === email.toLowerCase());
 }
 
@@ -332,11 +332,11 @@ function uploadFiles(form) {
   }
 
   Utilities.sleep(2000);
-  console.log(""); 
+  console.log("");
 
   try {
-    var enviarMail =  enviarEmail(totalCompra, solicitudId, formatSolicitante, false);
-    console.log("LLama a la función enviarEmail : " + enviarMail ) ; 
+    var enviarMail = enviarEmail(totalCompra, solicitudId, formatSolicitante, false);
+    console.log("LLama a la función enviarEmail : " + enviarMail);
   } catch (error) {
     return "ERROR: No se pudo enviar el email. " + error.message;
   }
@@ -477,7 +477,7 @@ function obtenerDatosProductos(form) {
   var cantidades = limpiarCadena(form["productQuantities[]"]).split(",");
   var precios = limpiarCadena(form["productPrices[]"]).split(",");
   var especificaciones = limpiarCadena(form["productSpecs[]"]).split(",");
-  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split(","); 
+  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split(",");
 
   /*const nombres = limpiarCadena(document.getElementById("productNames").value.split(","));
   const marcas = limpiarCadena(document.getElementById("productBrands").value.split(","));
@@ -496,7 +496,7 @@ function obtenerDatosProductos(form) {
   }));
 }
 function limpiarCadena(cadena) {
-  if(cadena == undefined || cadena == null){
+  if (cadena == undefined || cadena == null) {
     return "";
   }
   return cadena.replace(/,\s*$/, "");
@@ -863,7 +863,7 @@ function enviarCorreoGerenteGeneral(
   htmlTemplate.fechaSolicitud = registrosAprobados[0][4];
   htmlTemplate.justificacion = registrosAprobados[0][6];
   htmlTemplate.centroDeCosto = registrosAprobados[0][10];
-  htmlTemplate.observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14]: "";
+  htmlTemplate.observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
   htmlTemplate.tablaSolicitud = registrosAprobados;
   htmlTemplate.numberAprobadores = 2;
   htmlTemplate.scriptUrl = scriptUrl; // Pasar la URL del script a la plantilla
@@ -1040,7 +1040,7 @@ function enviarCorreoCompras(
 // Función para enviar email para su aprobación
 function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
   var filteredData = obtenerUltimosRegistros(solicitudId);
-  console.log("Estos son los registros para enviar en la función enviarEmail: "+ filteredData);
+  console.log("Estos son los registros para enviar en la función enviarEmail: " + filteredData);
 
   var htmlTemplate = HtmlService.createTemplateFromFile("tablaRequisitosEmail");
   var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
@@ -1089,7 +1089,19 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
     // Enviar correo para el solicitante
     GmailApp.sendEmail(formatSolicitante.solicitante.email, ("EL REGISTRO DE TU SOLICITUD DE COMPRA " + filteredData[0][0]) + " FUE EXITOSA", "ESTIMADO, TU SOLICITUD DE COMPRA ESTÁ EN CURSO", {
       htmlBody: htmlParaSolicitante,
+      attachments: [cotizacionFile.getAs(MimeType.PDF)]
     });
+
+    const correosDeCompras = obtenerCorreosCompras();
+
+    correosDeCompras.forEach((email) => {
+      //Enviar correo inicial para el área de compras 
+      GmailApp.sendEmail(email, ("NUEVA SOLICITUD DE COMPRA GENERADA CON ID" + filteredData[0][0]) + "", "ESTIMADO(A), ESTA SOLICITUD ESTÁ PENDIENTE DE APROBACIÓN", {
+        htmlBody: htmlParaSolicitante,
+        attachments: [cotizacionFile.getAs(MimeType.PDF)]
+      });
+    });
+
   } else {
     var html = htmlTemplate.evaluate().getContent();
     //Correo para la persona encargada de la aprobación
@@ -1099,6 +1111,21 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
     });
   }
 }
+
+//Extraer lista de correos para el área de compras 
+function obtenerCorreosCompras() {
+
+  var correos = [];
+  var data = obtenerDatos("Compras");
+
+  // Comenzar desde el índice 1 para omitir el encabezado
+  for (let i = 1; i < data.length; i++) {
+    correos.push(data[i][1]); // Asume que los correos están en la segunda columna
+  }
+  console.log("Estos son los correos de compras: " + correos);
+  return correos;
+}
+
 
 //Determinar el destinatario
 function determinarDestinatario(totalCompra, formatoSolicitante) {
@@ -1164,14 +1191,14 @@ function obtenerCapexSinFirmarDeDrive(capexUrl) {
 
 // Obtener los últimos registros de una solicitud
 function obtenerUltimosRegistros(solicitudId) {
-  console.log("Id de la solicitud: "+ solicitudId);
+  console.log("Id de la solicitud: " + solicitudId);
   //var libro = SpreadsheetApp.getActiveSpreadsheet();
   //var hoja = libro.getSheetByName("index");
   //var data = hoja.getDataRange().getValues();
   var data = obtenerDatos("index");
   //var totalCompra = costoTotalSolicitud(solicitudId);
   var filteredData = data.filter((row) => row[0] == solicitudId);
-  
+
   console.log("Este es el filteredData en la función obtenerUltimosRegistros: " + filteredData);
   return filteredData;
 }

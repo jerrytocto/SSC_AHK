@@ -16,6 +16,23 @@ function obtenerDatos(sheetName) {
   return data;
 }
 
+function obtenerDatosLogistica(sheetName) {
+  var sheet = conectarHoja(sheetName);
+  var data = sheet.getDataRange().getValues();
+  return data;
+}
+
+function conectarHojaLogistica(sheetName) {
+  var spreadsheetId = '1hl2ZUnPzlI8T_a0A8wQUSu19NQD4o697zDsuk3e8zx0'; // Reemplaza con el id de la hoja 
+  var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+
+  if (sheetName) {
+    return spreadsheet.getSheetByName(sheetName);
+  } else {
+    return spreadsheet.getActiveSheet(); // Retorna la pestaña activa si no se especifica un nombre
+  }
+}
+
 // Incluir archivo HTML
 function include(fileName) {
   return HtmlService.createHtmlOutputFromFile(fileName).getContent();
@@ -379,8 +396,6 @@ function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, for
   var fechaRegistro = new Date();
   var totalCompra = 0;
   var productos = obtenerDatosProductos(form);
-  console.log("Productos en la función registrarProductos: " + productos);
-  console.log(JSON.stringify(productos, null, 2));
 
   var observaciones = form.observaciones ? form.observaciones : "";
 
@@ -640,9 +655,12 @@ function enviarCorreoAprobado(registros, totalCompra, formatoUsuarioAprobador, c
   if (totalCompra <= 500) {
 
     //destinatario = "jerrytocto@gmail.com"; //Correo del área de compras
+    const namesAprobador = formatoUsuarioAprobador.solicitante.names;
+    const cargoAprobador = formatoUsuarioAprobador.solicitante.cargo;
 
     var nombreCargoAprobador = formatoUsuarioAprobador.solicitante.names + " - " + formatoUsuarioAprobador.solicitante.cargo;
     enviarCorreoCompras(registros, nombreCargoAprobador, destinatario, totalCompra, cotizacionUrl);
+    eviarSolicitudAprobadaAlDBLogistica(registros, totalCompra, cotizacionUrl, namesAprobador, cargoAprobador);
   } else {
     //Verificar la columna de estado que se ha modificado.
     if (columnaEstado == 15) {
@@ -679,6 +697,8 @@ function enviarCorreoAprobado(registros, totalCompra, formatoUsuarioAprobador, c
       //var formatoGerenteArea = transformarData(gerenteArea);
       //var nombreAreaGA = formatoGerenteArea.solicitante.names + " - " + formatoGerenteArea.solicitante.cargo;
       var nombreAreaGG = formatoUsuarioAprobador.solicitante.names + " - " + formatoUsuarioAprobador.solicitante.cargo;
+      const aprobador = formatoUsuarioAprobador.solicitante.names;
+      const cargoAprobador = formatoUsuarioAprobador.solicitante.cargo;
 
       //var nombreCargoAprobadores = nombreAreaGA + " y " + nombreAreaGG;
       var nombreCargoAprobadores = nombreAreaGG;
@@ -697,8 +717,56 @@ function enviarCorreoAprobado(registros, totalCompra, formatoUsuarioAprobador, c
         totalCompra,
         cotizacionUrl
       );
+      eviarSolicitudAprobadaAlDBLogistica(registros, totalCompra, cotizacionUrl, aprobador, cargoAprobador);
     }
   }
+}
+
+//Enviar data al sheet de logística 
+function eviarSolicitudAprobadaAlDBLogistica(registrosAprobados, totalCompra, cotizacionUrl, namesAprobador, cargoAprobador) {
+  var sheetLogistica = conectarHojaLogistica("Solicitudes");
+  var fecha = new Date();
+  //const totalCompra = totalCompra.toFixed(2);
+  const nombreAprobador = namesAprobador;
+  const cargoApro = cargoAprobador;
+  //const cotizacionFile = obtenerCotizacionDeDrive(cotizacionUrl);
+
+  const solicitudId = registrosAprobados[0][0];
+  const emisor = registrosAprobados[0][1];
+  const emailEmisor = registrosAprobados[0][1];
+  const razonDeCompra = registrosAprobados[0][3];
+  const fechaSolicitud = registrosAprobados[0][4];
+  const prioridad = registrosAprobados[0][5];
+  const justificacion = registrosAprobados[0][6];
+  const observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
+
+  registrosAprobados.forEach((producto) => {
+    var subtotal = calcularSubtotal(producto[11], producto[12]);
+
+    var fila = [
+      solicitudId,
+      emisor,
+      emailEmisor,
+      razonDeCompra,
+      fechaSolicitud,
+      prioridad,
+      justificacion,
+      producto[7],
+      producto[8],
+      producto[9],
+      producto[10],
+      producto[11],
+      producto[12],
+      subtotal,
+      observaciones,
+      nombreAprobador,
+      cargoApro,
+      fecha,
+      cotizacionUrl
+    ];
+
+    sheetLogistica.appendRow(fila);
+  });
 }
 
 //Función para buscar un users por email 

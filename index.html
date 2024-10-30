@@ -236,7 +236,7 @@
       <!-- Navbar (oculto inicialmente) -->
       <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light fixed-top" style="display: none;">
         <div class="container-fluid">
-          <h3 class="navbar-brand">Sistema de Solicitud de Compra</h3>
+          <h3 class="navbar-brand">SSC-AHK</h3>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -304,6 +304,7 @@
               <div class="col-md-3">
                 <label for="razonCompra" class="form-label">Razón para la compra *</label>
                 <select id="razonCompra" class="form-select" name="razonCompra" required>
+                  <option value="" disabled selected>Seleccione</option>
                   <option>Gerencia</option>
                   <option>Areas_de_Soporte</option>
                   <option>Supervision_Lima</option>
@@ -318,7 +319,8 @@
               <div class="col-md-3">
                 <label for="inputState" class="form-label">Prioridad *</label>
                 <select id="inputState" class="form-select" name="prioridad" required>
-                  <option selected>Alta</option>
+                  <option value="" disabled selected>Seleccione</option>
+                  <option>Alta</option>
                   <option>Media</option>
                   <option>Baja</option>
                 </select>
@@ -429,7 +431,6 @@
       <p>&copy; 2024 ALFRED H KNIGHT. Todos los derechos reservados.</p>
     </div>
   </footer>
-  </div>
 
   <!-- Modal para añadir producto -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
@@ -460,12 +461,12 @@
           </div>
           <div class="mb-3">
             <label for="productSpecsModal" class="form-label">Especificaciones</label>
-            <textarea class="form-control" id="productSpecsModal" style="height: 80%;"></textarea>
+            <textarea class="form-control" id="productSpecsModal" style="height: 80%;" required></textarea>
           </div>
           <div class="mb-3">
             <label for="productCentroCostosModal" class="form-label">Centro de Costos *</label>
-            <select id="productCentroCosto" class="form-control" name="productCentroCosto">
-              <option selected>Seleccione</option>
+            <select id="productCentroCosto" class="form-control" name="productCentroCosto" required >
+              <option value="" disabled selected>Seleccione</option>
             </select>
           </div>
         </div>

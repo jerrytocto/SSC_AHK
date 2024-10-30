@@ -3,9 +3,12 @@
   // Variale global que almacena el correo del usuario logueado
   var loggedUserEmail = "";
 
-  var solicitudesPorPagina = 8;
+  var solicitudesPorPagina = 10;
   var paginaActual = 1;
   var solicitudes = []; // Aquí se almacenarán las solicitudes
+
+  // Variable para rastrear el último botón clickeado
+  let lastClicked = null;
 
 
 
@@ -59,7 +62,6 @@
 
   // Es la función que se llama después de extraer el email del usuario que se está logeando
   function handleGoogleLogin(response) {
-    console.log("Respuesta de Google:", response);
 
     // Mostrar el spinner
     const spinner = document.getElementById('google-spinner');
@@ -172,50 +174,61 @@
 
   // Manejador del botón de solicitud de compra
   document.getElementById('request-button').addEventListener('click', function () {
-    document.getElementById('form-container').style.display = 'block';
 
-    // Ocultar la tabla de solicitudes de compra
-    document.getElementById('requests-table').style.display = 'none';
+    // Actualizar el último clic a "formulario"
+    lastClicked = 'formulario';
+
+    // Esperar un breve momento para asegurar que el último clic sea respetado
+    setTimeout(() => {
+      // Verificar si el último clic es todavía "formulario"
+      if (lastClicked === 'formulario') {
+        // Mostrar el formulario de solicitud de compra
+        document.getElementById('form-container').style.display = 'block';
+        // Ocultar la tabla de solicitudes de compra
+        document.getElementById('requests-table').style.display = 'none';
+      }
+    }, 50);
   });
 
-  // Manejador del enlace de "Inicio" en el navbar
+  // Manejador del enlace de "Mis solicitudes" en el navbar
   document.getElementById('home-link').addEventListener('click', function (event) {
     event.preventDefault(); // Evitar comportamiento predeterminado del enlace
 
-    // Mostrar la tabla de solicitudes de compra
-    document.getElementById('requests-table').style.display = 'block';
+    // Actualizar el último clic a "tabla"
+    lastClicked = 'tabla';
 
-    // Ocultar el formulario de solicitud de compra
-    document.getElementById('form-container').style.display = 'none';
-
-    // Llamar a la función del backend para cargar las solicitudes del usuario
-    google.script.run
-      .withSuccessHandler(function (solicitudesJson) {
-        // Aquí puedes manejar las solicitudes y mostrarlas en la tabla
-
-        try {
-          var solicitudes = JSON.parse(solicitudesJson);
-          if (solicitudes.length > 0) {
-            console.log("Solicitudes del usuario:", solicitudes);
-            //llenarTablaSolicitudes(solicitudes);
-            inicializarPaginacion(solicitudes);
-            document.getElementById('requests-table').style.display = 'block';
-          } else {
-            console.log("No hay solicitudes para mostrar");
-          }
-        } catch (e) {
-          console.error("Error al procesar las solicitudes:", e);
-        }
-
-
-        // Supongamos que tienes una función para mostrar las solicitudes en la tabla
-        //mostrarSolicitudesEnTabla(solicitudes);
-
+    // Esperar un breve momento para asegurar que el último clic sea respetado
+    setTimeout(() => {
+      // Verificar si el último clic es todavía "tabla"
+      if (lastClicked === 'tabla') {
         // Mostrar la tabla de solicitudes de compra
-        //document.getElementById('requests-table').style.display = 'block';
-      }).withFailureHandler(function (error) {
-        console.error("Error al cargar las solicitudes:", error);
-      }).formatSolicitudesPorEmail(loggedUserEmail);
+        document.getElementById('requests-table').style.display = 'block';
+        // Ocultar el formulario de solicitud de compra
+        document.getElementById('form-container').style.display = 'none';
+
+        // Llamar a la función del backend para cargar las solicitudes del usuario
+        google.script.run
+          .withSuccessHandler(function (solicitudesJson) {
+            try {
+              var solicitudes = JSON.parse(solicitudesJson);
+              if (solicitudes.length > 0) {
+                console.log("Solicitudes del usuario:", solicitudes);
+                inicializarPaginacion(solicitudes);
+              } else {
+                console.log("No hay solicitudes para mostrar");
+                alert("NO HAY SOLICITUDES PARA MOSTRAR");
+              }
+            } catch (e) {
+              console.error("Error al procesar las solicitudes:", e);
+            }
+          })
+          .withFailureHandler(function (error) {
+            console.error("Error al cargar las solicitudes:", error);
+          })
+          .formatSolicitudesPorEmail(loggedUserEmail);
+      }
+    }, 50);
+
   });
 
   // Llamar a esta función después de obtener y adaptar las solicitudes
@@ -232,13 +245,13 @@
     var fin = inicio + solicitudesPorPagina;
     var solicitudesPagina = solicitudes.slice(inicio, fin);
 
-    solicitudes.forEach(function (solicitud, index) {
+    solicitudesPagina.forEach(function (solicitud, index) {
       var row = tbody.insertRow();
       row.className = 'solicitud-row';
 
       // Celda para el número de fila
       var cellIndex = row.insertCell(0);
-      cellIndex.textContent = index + 1;
+      cellIndex.textContent = inicio + index + 1;
 
       // Celda para el código de la solicitud
       var cellCodigo = row.insertCell(1);
@@ -267,12 +280,34 @@
       // Celda para seguimiento
       var cellSeguimiento = row.insertCell(7);
       var btnSeguimiento = document.createElement('button');
-      btnSeguimiento.className = 'btn btn-sm btn-info';
+
+      console.log(`Estado de la solicitud (ID: ${solicitud.id}):`, solicitud.estado);
+
+      /*switch ((solicitud.estado || 'Pendiente').trim().toLowerCase()) {
+        case 'aprobada':
+          btnSeguimiento.className = 'btn btn-sm';
+          btnSeguimiento.style.backgroundColor = 'green'; // Verde para aprobado
+          btnSeguimiento.style.color = 'white';
+          break;
+        case 'rechazada':
+          btnSeguimiento.className = 'btn btn-sm';
+          btnSeguimiento.style.backgroundColor = 'red'; // Rojo para rechazado
+          btnSeguimiento.style.color = 'white';
+          break;
+        default:
+          btnSeguimiento.className = 'btn btn-sm';
+          btnSeguimiento.style.backgroundColor = 'orange'; // Amarillo para pendiente
+          btnSeguimiento.style.color = 'white';
+      }*/
+
       btnSeguimiento.innerHTML = '<i class="bi bi-clock-history"></i>';
+
       btnSeguimiento.onclick = function (e) {
         e.stopPropagation(); // Evita que se active el clic de la fila
         mostrarSeguimientoSolicitud(solicitud.id);
       };
+
+
       cellSeguimiento.appendChild(btnSeguimiento);
 
       // Añadir evento de clic a toda la fila excepto la última celda
@@ -535,7 +570,7 @@
     const productCentroCostos = document.getElementById("productCentroCosto").value;
 
     // Verifica que los campos del modal de añadirProducto tengan contenido para poder añadir a la tabla
-    if (productName && productBrand && productQuantity && productPrice && productCentroCosto) {
+    if (productName && productBrand && productQuantity && productPrice && productCentroCostos !== "" && productSpecs) {
       const newRow = document.createElement("tr");
       newRow.innerHTML = `
           <td>${productName}</td>
@@ -549,7 +584,7 @@
       // Añado el nuevo producto a la tabla
       productTable.appendChild(newRow);
 
-      //Añadir cada uno de los campos del formulario a los inputs ocultos 
+      //Añadir cada uno de los campos del formulario a los inputs ocultos
       document.getElementById("productNames").value += `${productName},`;
       document.getElementById("productBrands").value += `${productBrand},`;
       document.getElementById("productQuantities").value += `${productQuantity},`;
@@ -557,16 +592,9 @@
       document.getElementById("productSpecs").value += `${productSpecs},`;
       document.getElementById("productCentroCostos").value += `${productCentroCostos},`;
 
-      console.log(newRow);
-
-      console.log(productBrand.value);
-      console.log(productName.value);
-
       // Limpiar los campos del modal
       clearProductModal();
 
-      console.log(productBrand.value);
-      console.log(productName.value);
       // Ocultar el modal
       const addProductModal = document.getElementById('addProductModal');
       const modal = bootstrap.Modal.getInstance(addProductModal);
@@ -577,13 +605,12 @@
   });
 
   function clearProductModal() {
-    console.log("Limpiando campos del modal");
     document.getElementById("productNameModal").value = '';
     document.getElementById("productBrandModal").value = '';
     document.getElementById("productQuantityModal").value = '';
     document.getElementById("productPriceModal").value = '';
     document.getElementById("productSpecsModal").value = '';
-    document.getElementById("productCentroCosto").value = 'Seleccione';
+    document.getElementById("productCentroCosto").value = '';
   }
 
 
@@ -605,5 +632,4 @@
   document.addEventListener('keypress', resetSessionTimer);
   document.addEventListener('scroll', resetSessionTimer);
   document.addEventListener('mousemove', resetSessionTimer);
-
 </script>

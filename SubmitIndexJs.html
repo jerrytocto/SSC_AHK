@@ -24,6 +24,7 @@
             </div>
           `;
         resultModal.show();
+        //clearProductModal();
         button.disabled = false;
 
 
@@ -62,10 +63,21 @@
             </div>
           `;
         resultModal.show();
+        //clearProductModal();
         button.disabled = false;
       })
       .uploadFiles(form);
   }
+
+  // Recargar la página después del cierre del modal de resultado
+  document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
+    // Recargar la página usando Apps Script
+    google.script.host.close();
+    google.script.run.withSuccessHandler(() => {
+      google.script.host.editor.focus(); // Enfoca la ventana nuevamente
+      location.reload(); // Recargar la página actual
+    });
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"

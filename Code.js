@@ -233,8 +233,6 @@ function adaptarSolicitudesUsuario(solicitudes) {
   solicitudesAdaptadas.forEach((solicitud) => {
     solicitud.estado = determinarEstadoSolicitud(solicitud.totalCompra, solicitud.estadoJefe, solicitud.estadoGerente);
   });
-
-  console.log("Solicitudes adaptadas en adaptarSolicitudesUsuario: " + JSON.stringify(solicitudesAdaptadas));
   return solicitudesAdaptadas;
 }
 

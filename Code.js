@@ -174,6 +174,27 @@ function checkUserEmail(email) {
   }
   return { isValid: false, message: "Correo electrónico no registrado" };
 }
+/*
+function buscarUsuarioPorEmail(email) {
+  //var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("users");
+  //var data = sheet.getDataRange().getValues();
+
+  var data = obtenerDatos("users");
+
+  email = email.trim().toLowerCase();
+
+  for (var i = 1; i < data.length; i++) {
+    var dbEmail = String(data[i][2]).trim().toLowerCase(); // Asumiendo que el email está en la columna 3
+    console.log("Email en la función buscarUsuarioPorEmail: " + dbEmail);
+
+    if (dbEmail === email) {
+      userSolicitante = data[i];
+      console.log("Usuario encontrado en la función buscarUsuarioPorEmail: " + userSolicitante);
+      return userSolicitante;
+    }
+  }
+  return "";
+}*/
 
 function formatSolicitudesPorEmail(email) {
   var solicitudesPorUsuario = cargarSolicitudesUsuarioPorEmail(email);
@@ -306,7 +327,6 @@ function uploadFiles(form) {
   //var ss = SpreadsheetApp.getActiveSpreadsheet();
   //var sheetRegistro = ss.getSheetByName("index");
   //var sheetRegistro = obtenerDatos("index");
-  console.log("Entra a la función uploadFiles");
 
 
   var sheetRegistro = conectarHoja("index");
@@ -330,12 +350,14 @@ function uploadFiles(form) {
   console.log("Solicitud ID en la función formatSolicitante: " + formatSolicitante);
   console.log("LLama a la función generarSolicitudId : " + solicitudId);
 
-  var cotizacionUrl;
-  try {
-    cotizacionUrl = guardaCotizacionEnDrive(form, solicitudId);
-    console.log("LLama a la función guardaCotizacionEnDrive : " + cotizacionUrl);
-  } catch (error) {
-    return "ERROR: No se pudo guardar la cotización. " + error.message;
+  var cotizacionUrl = "";
+  if (form.file && form.file.length > 0) {
+    try {
+      cotizacionUrl = guardaCotizacionEnDrive(form, solicitudId);
+      console.log("LLama a la función guardaCotizacionEnDrive : " + cotizacionUrl);
+    } catch (error) {
+      return "ERROR: No se pudo guardar la cotización. " + error.message;
+    }
   }
 
   var totalCompra;
@@ -364,19 +386,26 @@ function uploadFiles(form) {
 //Función para guardar la cotización en el drive
 function guardaCotizacionEnDrive(form, solicitudId) {
   const folder = DriveApp.getFolderById('18fFmBROdo78YBHU-1NV45qLRJIWHkSrR');
-  const fileBlob = form.file;
 
-  // Obtén el nombre original del archivo
-  const originalFileName = fileBlob.getName();
+  if (form.file == null || form.file == undefined || form.file == "") {
+    return "";
 
-  // Genera el nuevo nombre de archivo
-  const newFileName = `Coti_${solicitudId}_${originalFileName}`;
+  } else {
+    const fileBlob = form.file;
 
-  // Crea el archivo en la carpeta con el nuevo nombre
-  const file = folder.createFile(fileBlob).setName(newFileName);
+    // Obtén el nombre original del archivo
+    const originalFileName = fileBlob.getName();
 
-  const fileUrl = file.getUrl();
-  return fileUrl;
+    // Genera el nuevo nombre de archivo
+    const newFileName = `Coti_${solicitudId}_${originalFileName}`;
+
+    // Crea el archivo en la carpeta con el nuevo nombre
+    const file = folder.createFile(fileBlob).setName(newFileName);
+
+    const fileUrl = file.getUrl();
+    return fileUrl;
+  }
+
 }
 
 // Genera un ID único para la solicitud
@@ -760,7 +789,7 @@ function eviarSolicitudAprobadaAlDBLogistica(registrosAprobados, totalCompra, co
       nombreAprobador,
       cargoApro,
       fecha,
-      cotizacionUrl
+      cotizacionUrl = ! "" ? cotizacionUrl : ""
     ];
 
     sheetLogistica.appendRow(fila);
@@ -942,20 +971,29 @@ function enviarCorreoGerenteGeneral(
   htmlTemplate.paraAprobar = !esNotificacion;
   htmlTemplate.totalCompra = totalCompra.toFixed(2);
 
-  var cotizacionFile = obtenerCotizacionDeDrive(cotizacionUrl);
-  var adjuntos = [cotizacionFile.getAs(MimeType.PDF)];
+  var adjuntos = [];
+
+  var cotizacionFile = cotizacionUrl != "" ? obtenerCotizacionDeDrive(cotizacionUrl) : "";
+  if (cotizacionFile != "") {
+    var adjuntos = [cotizacionFile.getAs(MimeType.PDF)];
+  }
 
   var asunto;
   if (totalCompra > 1000) {
     if (!esNotificacion) {
       var capex = generateCapex(totalCompra, registrosAprobados, nombreAreaGA, false);
       actualizarHojaConEnlaceCapex(htmlTemplate.solicitudId, capex.link);
-      adjuntos.push(capex.pdf);
+      if (capex && capex.pdf) {
+        adjuntos.push(capex.pdf);
+      }
+
       asunto = "Nueva Solicitud de Compra Aprobada";
     } else {
       var capexUrl = registrosAprobados[0][22];
       var capex = obtenerCapexSinFirmarDeDrive(capexUrl);
-      adjuntos.push(capex);
+      if (capex) {
+        adjuntos.push(capex);
+      }
       asunto = `Notificación de aprobación para la compra aa ${htmlTemplate.solicitudId}`;
     }
   } else {
@@ -975,7 +1013,7 @@ function enviarCorreoGerenteGeneral(
     "Nueva solicitud de compra.",
     {
       htmlBody: html,
-      attachments: adjuntos
+      attachments: adjuntos.length > 0 ? adjuntos : null
     }
   );
 }
@@ -1021,15 +1059,20 @@ function actualizarHojaConEnlaceCapex(solicitudId, enlaceCapex) {
 // Enviar correo de notificación al remitente
 function enviarCorreoRemitente(email, solicitudId, estado, formatoSolicitante, columnaEstado, totalCompra) {
 
+  var solicitante = cargarDataUsersPorEmail(email);
+  var formatSolic = transformarData(solicitante);
+  var nombreSolicitante = formatSolic.solicitante.names;
   //Notificar cuando la solicitud es menor a 500
   if (totalCompra <= 500 && estado != "Aprobado") {
-    var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. GRACIAS`;
+    var subject = `Actualización en su solicitud de comrpa #${solicitudId}`;
+    var body = `Estimado(a) ${nombreSolicitante}, LE INFORMAMOS QUE SU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. 
+                AGRADECEMOS SU ATENCIÓN.`;
 
   } else if (totalCompra <= 500 && estado === "Aprobado") {
-    var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}
-                Y SE DERIVÓ AL ÁREA DE COMPRAS. GRACIAS`;
+    var subject = `Actualización en su solicitud de comrpa #${solicitudId}`;
+    var body = ` Estimado(a) ${nombreSolicitante}, Nos complace informarle que su solicitud de compra con ID ${solicitudId} ha sido ${estado} por ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}.
+                Su solicitud ahora ha sido derivada al área de logística(Compras) para materializar lo solicitado.
+                Agradecemos de antemano su comprensión y paciencia en este proceso. Si tiene alguna consulta o requiere información adicional, no dude en ponerse en contacto con el área de Logística.`;
 
   } else if (totalCompra > 500 && columnaEstado == 15 && estado === "Aprobado") {
 
@@ -1037,22 +1080,30 @@ function enviarCorreoRemitente(email, solicitudId, estado, formatoSolicitante, c
     var jefeAprobador = cargarDataUsers(aprobadorId);
     var formatoJefeAprobador = transformarData(jefeAprobador);
 
-    var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. 
-                AHORA ESTÁ SIENDO EVALUADA POR ${formatoJefeAprobador.solicitante.names} - ${formatoJefeAprobador.solicitante.cargo}. GRACIAS`;
+    var subject = `Actualización en su solicitud de compra #${solicitudId}`;
+    var body = `Estimado(a) ${nombreSolicitante}, le informamos que su solicitud de compra con  ID ${solicitudId} ha sido ${estado}  por ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. 
+                Actualmente, se encuentra en evaluación por ${formatoJefeAprobador.solicitante.names} - ${formatoJefeAprobador.solicitante.cargo}. 
+                No dudes en contactar al responsable de la evaluación ante cualquier duda o consulta`;
 
   } else if (totalCompra > 500 && columnaEstado == 15 && estado != "Aprobado") {
-    var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. GRACIAS`;
+    var subject = `Actualización en su solicitud de compra #${solicitudId}`;
+    var body = `Estimado(a) ${nombreSolicitante}, 
+                le  informamos que su solicitu de compra con ID ${solicitudId} ha sido ${estado}  por ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. 
+                Agradecemos su comprensión.`;
 
   } else if (totalCompra > 500 && columnaEstado == 18 && estado === "Aprobado") {
     var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}.
-                AHORA ESTÁ SIENDO EVALUADA POR EL ÁREA DE COMPRAS. GRACIAS`;
+    var body = `Estimado(a) ${nombreSolicitante},
+                Nos complace informarle que su solicitud de compra con ID ${solicitudId} ha sido ${estado} por ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}.
+                Actualmente, su solicitud se encuentra siendo evaluada por el área de compras. 
+                
+                Si desea saber más sobre el estado de su solicitud, no dude en ponerse en contacto con el área de compras.`;
 
   } else if (totalCompra > 500 && columnaEstado == 18 && estado != "Aprobado") {
-    var subject = `Novedades en tu solicitud de compra #${solicitudId}`;
-    var body = `TU SOLICITUD DE COMPRA CON  ID ${solicitudId} ha sido ${estado}  POR ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}. GRACIAS`;
+    var subject = `Actualización en su solicitud de compra #${solicitudId}`;
+    var body = `Estimado(a) ${nombreSolicitante},
+               Le informamos que su solicitud de compra con ID ${solicitudId} ha sido ${estado} por ${formatoSolicitante.solicitante.names} - ${formatoSolicitante.solicitante.cargo}.
+               No dudes en contactar al responsable de la evaluación ante cualquier duda o consulta.`;
   }
 
 
@@ -1090,17 +1141,36 @@ function enviarCorreoCompras(
 
   var html = htmlTemplate.evaluate().getContent();
 
-  var cotizacionFile = obtenerCotizacionDeDrive(cotizacionUrl);
+  var cotizacionFile = cotizacionUrl != "" ? obtenerCotizacionDeDrive(cotizacionUrl) : "";
 
+  var attachments = [];
+  if (cotizacionFile) {
+    attachments.push(cotizacionFile.getAs(MimeType.PDF));
+  }
+
+  /*
   GmailApp.sendEmail(
     destinatario,
     "Nueva Solicitud de Compra Aprobada con Id: " + registrosAprobados[0][0],
     "Nueva solicitud de compra aprobada.",
     {
       htmlBody: html,
-      attachments: [cotizacionFile.getAs(MimeType.PDF)]
+      attachments: attachments
     }
-  );
+  ); */
+
+  const correosDeCompras = obtenerCorreosCompras();
+  if (correosDeCompras.length > 0) {
+    correosDeCompras.forEach((email) => {
+      //Enviar correo inicial para el área de compras 
+      GmailApp.sendEmail(email, ("NUEVA SOLICITUD DE COMPRA APROBADA CON ID" + registrosAprobados[0][0]) + "", "ESTIMADO(A), ESTA SOLICITUD ESTÁ FUÉ APROBADA", {
+        htmlBody: html,
+        attachments: attachments
+      });
+    });
+
+  }
+
 }
 
 // Función para enviar email para su aprobación
@@ -1134,18 +1204,26 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
 
   // Obtener el enlace del documento PDF desde la columna 21
   var pdfUrl = filteredData[0][21];
-  var cotizacionFile = obtenerCotizacionDeDrive(pdfUrl);
+  var cotizacionFile = pdfUrl != "" ? obtenerCotizacionDeDrive(pdfUrl) : "";
 
   //var fileId = pdfUrl.match(/[-\w]{25,}/); // Extrae el ID del archivo del enlace
   //var file = DriveApp.getFileById(fileId);
 
+  var attach = [];
+
+  if (cotizacionFile != "") {
+    attach.push(cotizacionFile.getAs(MimeType.PDF));
+
+  }
+
   // Configurar el correo para el solicitante
   if (!esAviso) {
     var html = htmlTemplate.evaluate().getContent();
+
     //Correo para la persona encargada de la aprobación
     GmailApp.sendEmail(destinatario.solicitante.email, ("SOLICITUD DE COMPRA " + filteredData[0][0]), "MENSAJE DEL EMAIL", {
       htmlBody: html,
-      attachments: [cotizacionFile.getAs(MimeType.PDF)]
+      attachments: attach
     });
 
     htmlTemplate.mostrarCampoAprobador = 0;
@@ -1155,7 +1233,7 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
     // Enviar correo para el solicitante
     GmailApp.sendEmail(formatSolicitante.solicitante.email, ("EL REGISTRO DE TU SOLICITUD DE COMPRA " + filteredData[0][0]) + " FUE EXITOSA", "ESTIMADO, TU SOLICITUD DE COMPRA ESTÁ EN CURSO", {
       htmlBody: htmlParaSolicitante,
-      attachments: [cotizacionFile.getAs(MimeType.PDF)]
+      attachments: attach
     });
 
     const correosDeCompras = obtenerCorreosCompras();
@@ -1164,7 +1242,7 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
       //Enviar correo inicial para el área de compras 
       GmailApp.sendEmail(email, ("NUEVA SOLICITUD DE COMPRA GENERADA CON ID" + filteredData[0][0]) + "", "ESTIMADO(A), ESTA SOLICITUD ESTÁ PENDIENTE DE APROBACIÓN", {
         htmlBody: htmlParaSolicitante,
-        attachments: [cotizacionFile.getAs(MimeType.PDF)]
+        attachments: attach
       });
     });
 
@@ -1173,7 +1251,7 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
     //Correo para la persona encargada de la aprobación
     GmailApp.sendEmail(destinatario.solicitante.email, ("NOTIFICACIÓN DE APROBACIÓN PARA LA SOLICITUD DE COMPRA " + filteredData[0][0]), "MENSAJE DEL EMAIL", {
       htmlBody: html,
-      attachments: [cotizacionFile.getAs(MimeType.PDF)]
+      attachments: attach
     });
   }
 }

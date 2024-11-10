@@ -9,14 +9,13 @@ function getOAuthToken() {
 
 function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFirma, nombreAreaGG) {
 
-
   //Identificadores de los documentos a usar (id)
   var capexPlantillaId = "1f4gccifvzDY23aWDhEaeEHSNzEEgW-vjdVIQE00HsPk"; // Id de la plantilla de capex
   var pdfId = "1T_vTy4BVj3ypQbes5jMm4yWYOaWmacF3";      // Id de la carpeta de PDFs
   var tempId = "1PN_mQmT_RoOZJCRwhPd0xr8zkeNrNeIP";     // Id de la carpeta temporal 
   var idCarpetaParaVerQR = "1QdGRoSx9ZWJv4WAJ1finjQBm4FJrv7xb";     // Id de la nueva carpeta para el PDF inicial
 
-  //Para poder realizar los cambios en Google Docs 
+  //Para poder realizar los cambios en Google Docs
   var capexPlantilla = DriveApp.getFileById(capexPlantillaId);
   var carpetaPdf = DriveApp.getFolderById(pdfId);
   var carpetaTemp = DriveApp.getFolderById(tempId);
@@ -26,16 +25,28 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   var copiaPlantilla = capexPlantilla.makeCopy(carpetaTemp);
   var copiaId = copiaPlantilla.getId();
   var doc = DocumentApp.openById(copiaId);
+  var body = doc.getBody();
 
-  console.log("Registros en el archivo capex: " + registrosAprobados)
+  console.log("Listado de productus aprobados que debería ir en el capex: " + registrosAprobados);
   // Datos generales (asumiendo que los datos generales están en la primera fila)
-  var solicitante = registrosAprobados[0][1];
+  //var solicitanteDB = registrosAprobados[0][1];
   var razonCompra = registrosAprobados[0][3];
   var fechaRegistro = registrosAprobados[0][4];
   var justificacion = registrosAprobados[0][6];
   var prioridad = registrosAprobados[0][5];
   var solicitudId = registrosAprobados[0][0];
   var observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
+  var usuarioEmail = registrosAprobados[0][2];
+
+  var solicitante = cargarDataUsersPorEmail(usuarioEmail);
+  console.log("Solicitante: " + solicitante);
+
+  if(solicitante) {
+    var formatSolicitante = transformarData(solicitante);
+    var mostrarUsuarioCapex = formatSolicitante.solicitante.names + " - " + formatSolicitante.solicitante.cargo;
+  } else {
+    var mostrarUsuarioCapex = registrosAprobados[0][1];  // Valor alternativo en caso de que solicitante no esté definido
+  }
 
   //Obtener fecha de creación del capex
   var date = new Date();
@@ -46,11 +57,11 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
 
   // Reemplazar datos generales en el documento
   var body = doc.getBody();
-  body.replaceText("{{solicitante}}", solicitante);
+  //body.replaceText("{{solicitante}}", solicitante);
   body.replaceText("{{justificacion}}", justificacion);
   body.replaceText("{{prioridad}}", prioridad);
   body.replaceText("{{totalCompra}}", totalCompra.toFixed(2));
-  body.replaceText("{{aprobador}}", aprobadoresEmail);
+  body.replaceText("{{solicitante}}", mostrarUsuarioCapex);
   body.replaceText("{{solicitudId}}", solicitudId);
   body.replaceText("{{dia}}", dia);
   body.replaceText("{{mes}}", mes);
@@ -73,7 +84,6 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   var endIndex = body.getText().indexOf("{{/productos}}") + "{{/productos}}".length;
   var blockText = body.getText().substring(startIndex, endIndex);
   var productTemplate = blockText.replace(productosPlaceholder, "").replace("{{/productos}}", "");
-
 
   // Crear un bloque de texto repetible
   var productContent = "";
@@ -103,6 +113,8 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
     productContent += productEntry;
     descripAllProducts += descripAllProductsEntry;
   }
+
+
 
   body.replaceText("{{PRODUCTOS}}", productContent);
   body.replaceText("{{DESCRIPTALLPRODUCTS}}", descripAllProducts);

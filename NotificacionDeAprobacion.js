@@ -167,7 +167,7 @@ function enviarEmailDeAviso(registrosPorSolicitud, columnaEstado) {
     } else if (columnaEstado == 18) {
 
         // Obtener el link de la cotización 
-        var cotizacion = registrosPorSolicitud[0][21];
+        var cotizacion = registrosPorSolicitud[0][21] !="" ? registrosPorSolicitud[0][21] : "";
 
         // Verificar quien es la persona que realizó la primera aprobación 
         var aprobador = determinarDestinatario(costoTotal, formatSolicitante);

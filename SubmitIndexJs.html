@@ -27,7 +27,6 @@
         //clearProductModal();
         button.disabled = false;
 
-
         // Limpiar selects
         document.getElementById('razonCompra').selectedIndex = 0;
         document.getElementById('inputState').selectedIndex = 0;
@@ -47,12 +46,12 @@
 
         // Limpiar campos ocultos de productos
         const hiddenInputs = ['productNames', 'productBrands', 'productQuantities', 'productPrices', 'productSpecs', 'productCentroCostos'];
-        hiddenInputs.forEach(id => {
-          const element = document.getElementById(id);
-          if (element) {
-            element.value = '';
-          }
-        });
+         hiddenInputs.forEach(id => {
+           const element = document.getElementById(id);
+           if (element) {
+             element.value = '';
+           }
+         });
       })
       .withFailureHandler(error => {
         processingModal.hide();

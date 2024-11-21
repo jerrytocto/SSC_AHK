@@ -560,7 +560,11 @@
   const saveProductBtn = document.getElementById("saveProductBtn");
   const productTable = document.getElementById("productTable");
 
-  //Evento para cuando se quiera añadir un producto a la tabla
+  /**
+  *   EVENTO PARA CUANDO SE QUIERA AÑADIR UN PRODUCTO A LA TABLA DE VISUALIZACIÓN DE PRODUCTO, ESTE EVENO SE LLAMA DESPUÉS DE 
+  *   PRESIONAR EN EL BOTÓN AÑADIR PRODUCTO DEL MODAL QUE PERMITE AÑADIR PRODUCTOS 
+  */
+  
   saveProductBtn.addEventListener("click", function () {
     const productName = document.getElementById("productNameModal").value;
     const productBrand = document.getElementById("productBrandModal").value;
@@ -580,8 +584,8 @@
           <td>${productSpecs}</td>
           <td>${productCentroCostos}</td>
         `;
-
-      // Añado el nuevo producto a la tabla
+        
+      // Añado el nuevo producto 
       productTable.appendChild(newRow);
 
       //Añadir cada uno de los campos del formulario a los inputs ocultos

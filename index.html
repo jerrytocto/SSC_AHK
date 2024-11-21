@@ -245,11 +245,15 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
               <li class="nav-item">
                 <!--<a id="home-link" class="nav-link active" aria-current="page" href="#">Mis Solicitudes</a>-->
-                <a id="home-link" class="nav-link active" aria-current="page" href="#" style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px; text-decoration: none; display: inline-block; margin-right: 10px;">Mis Solicitudes</a>
+                <a id="home-link" class="nav-link active" aria-current="page" href="#"
+                  style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px; text-decoration: none; display: inline-block; margin-right: 10px;">Mis
+                  Solicitudes</a>
               </li>
               <li class="nav-item">
                 <!--<button id="request-button" class="btn" style="display: none; background-color: #fff; color: #000; border: 1px solid #ccc;">Nueva Solicitud</button>-->
-                <button id="request-button" class="btn" style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px;">Nueva Solicitud</button>
+                <button id="request-button" class="btn"
+                  style="background-color: #fff; color: #000; border: 1px solid #ccc; padding: 6px 12px;">Nueva
+                  Solicitud</button>
               </li>
             </ul>
             <div class="dropdown">
@@ -419,19 +423,6 @@
     </div>
   </div>
 
-
-  <!-- FOOTER (siempre visible) -->
-  <footer class="footer">
-    <div class="container footer-container">
-      <div class="footer-image" style="background-image: url('./img/footerOne.webp')">
-        <!-- Imagen de footer -->
-      </div>
-    </div>
-    <div class="container">
-      <p>&copy; 2024 ALFRED H KNIGHT. Todos los derechos reservados.</p>
-    </div>
-  </footer>
-
   <!-- Modal para añadir producto -->
   <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -465,7 +456,7 @@
           </div>
           <div class="mb-3">
             <label for="productCentroCostosModal" class="form-label">Centro de Costos *</label>
-            <select id="productCentroCosto" class="form-control" name="productCentroCosto" required >
+            <select id="productCentroCosto" class="form-control" name="productCentroCosto" required>
               <option value="" disabled selected>Seleccione</option>
             </select>
           </div>
@@ -508,5 +499,17 @@
   <?!= include('loginJs'); ?>
 
 </body>
+
+<!-- FOOTER (siempre visible) -->
+<footer class="footer">
+  <div class="container footer-container">
+    <div class="footer-image" style="background-image: url('./img/footerOne.webp')">
+      <!-- Imagen de footer -->
+    </div>
+  </div>
+  <div class="container">
+    <p>&copy; 2024 ALFRED H KNIGHT. Todos los derechos reservados.</p>
+  </div>
+</footer>
 
 </html>

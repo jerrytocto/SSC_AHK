@@ -24,7 +24,7 @@
             </div>
           `;
         resultModal.show();
-        //clearProductModal();
+        clearProductModal();
         button.disabled = false;
 
         // Limpiar selects
@@ -46,12 +46,12 @@
 
         // Limpiar campos ocultos de productos
         const hiddenInputs = ['productNames', 'productBrands', 'productQuantities', 'productPrices', 'productSpecs', 'productCentroCostos'];
-         hiddenInputs.forEach(id => {
-           const element = document.getElementById(id);
-           if (element) {
-             element.value = '';
-           }
-         });
+        hiddenInputs.forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.value = '';
+          }
+        });
       })
       .withFailureHandler(error => {
         processingModal.hide();
@@ -62,20 +62,51 @@
             </div>
           `;
         resultModal.show();
-        //clearProductModal();
+        clearProductModal();
         button.disabled = false;
       })
       .uploadFiles(form);
   }
 
+
+  // Configuración de eventos para el modal de resultado
+  const resultModal = document.getElementById('resultModal');
+
+  // Manejar el foco y la accesibilidad al mostrar el modal
+  resultModal.addEventListener('show.bs.modal', function () {
+    // Desenfocar cualquier elemento activo
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+  });
+
+  resultModal.addEventListener('shown.bs.modal', function () {
+    // Establecer el foco en el botón de cierre
+    const closeButton = this.querySelector('.btn-close');
+    if (closeButton) {
+      closeButton.focus();
+    }
+  });
+
+
   // Recargar la página después del cierre del modal de resultado
-  document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
-    // Recargar la página usando Apps Script
-    google.script.host.close();
-    google.script.run.withSuccessHandler(() => {
-      google.script.host.editor.focus(); // Enfoca la ventana nuevamente
-      location.reload(); // Recargar la página actual
+  resultModal.addEventListener('hidden.bs.modal', function () {
+    // Limpiar cualquier foco residual
+    this.querySelectorAll('button, a, input').forEach(el => {
+      el.blur();
     });
+
+    // Recargar la página
+    window.location.reload();
+  });
+
+  // Manejadores de eventos para los botones de cierre
+  document.getElementById('closeResultModalBtn').addEventListener('click', function () {
+    window.location.reload();
+  });
+
+  document.getElementById('closeResultModalFooterBtn').addEventListener('click', function () {
+    window.location.reload();
   });
 </script>
 

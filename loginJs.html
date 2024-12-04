@@ -353,6 +353,7 @@
     google.script.run
       .withSuccessHandler(function (detSolicitud) {
         var detallesSolicitud = JSON.parse(detSolicitud);
+        console.log("Estos son los detalles de la solicitud " + solicitudId + " : " + detallesSolicitud);
         //console.log('Tamaño de la solicitud:', detallesSolicitud.length);
         if (!detallesSolicitud || detallesSolicitud.length === 0) {
           $('#detalleModal .modal-content').html('<div class="alert alert-warning">No se encontraron detalles para la solicitud.</div>');
@@ -564,14 +565,14 @@
   *   EVENTO PARA CUANDO SE QUIERA AÑADIR UN PRODUCTO A LA TABLA DE VISUALIZACIÓN DE PRODUCTO, ESTE EVENO SE LLAMA DESPUÉS DE 
   *   PRESIONAR EN EL BOTÓN AÑADIR PRODUCTO DEL MODAL QUE PERMITE AÑADIR PRODUCTOS 
   */
-  
+
   saveProductBtn.addEventListener("click", function () {
-    const productName = document.getElementById("productNameModal").value;
-    const productBrand = document.getElementById("productBrandModal").value;
-    const productQuantity = document.getElementById("productQuantityModal").value;
-    const productPrice = document.getElementById("productPriceModal").value;
-    const productSpecs = document.getElementById("productSpecsModal").value;
-    const productCentroCostos = document.getElementById("productCentroCosto").value;
+    const productName = document.getElementById("productNameModal").value.trim();
+    const productBrand = document.getElementById("productBrandModal").value.trim();
+    const productQuantity = document.getElementById("productQuantityModal").value.trim();
+    const productPrice = document.getElementById("productPriceModal").value.trim();
+    const productSpecs = document.getElementById("productSpecsModal").value.trim();
+    const productCentroCostos = document.getElementById("productCentroCosto").value.trim();
 
     // Verifica que los campos del modal de añadirProducto tengan contenido para poder añadir a la tabla
     if (productName && productBrand && productQuantity && productPrice && productCentroCostos !== "" && productSpecs) {
@@ -584,7 +585,7 @@
           <td>${productSpecs}</td>
           <td>${productCentroCostos}</td>
         `;
-        
+
       // Añado el nuevo producto 
       productTable.appendChild(newRow);
 
@@ -603,6 +604,10 @@
       const addProductModal = document.getElementById('addProductModal');
       const modal = bootstrap.Modal.getInstance(addProductModal);
       modal.hide();
+
+      // Mover el foco fuera del modal
+      saveProductBtn.blur();
+
     } else {
       alert("Por favor, complete todos los campos obligatorios.");
     }
@@ -632,8 +637,8 @@
   }
 
   // Eventos para mostrar y ocultar el modal de añadir producto
-  document.addEventListener('click', resetSessionTimer);
-  document.addEventListener('keypress', resetSessionTimer);
-  document.addEventListener('scroll', resetSessionTimer);
-  document.addEventListener('mousemove', resetSessionTimer);
+  //document.addEventListener('click', resetSessionTimer);
+  //document.addEventListener('keypress', resetSessionTimer);
+  //document.addEventListener('scroll', resetSessionTimer);
+  //document.addEventListener('mousemove', resetSessionTimer);
 </script>

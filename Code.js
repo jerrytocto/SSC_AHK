@@ -354,7 +354,7 @@ function generarSolicitudId(sheetRegistro) {
   return 1000;
 }
 
-// Registra los productos en la hoja de cálculo
+// Registra los productos en la base de datos (google sheet)
 function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, formatSolicitante) {
   var fechaRegistro = new Date();
   var totalCompra = 0;
@@ -388,6 +388,7 @@ function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, for
       observaciones
     ];
 
+    //Determinar el destinatario para su aprobación de la solicitud de compra 
     if (totalCompra <= 500) {
       var jefeArea = determinarDestinatario(totalCompra, formatSolicitante);
 
@@ -679,7 +680,7 @@ function eviarSolicitudAprobadaAlDBLogistica(registrosAprobados, totalCompra, co
 
   const solicitudId = registrosAprobados[0][0];
   const emisor = registrosAprobados[0][1];
-  const emailEmisor = registrosAprobados[0][1];
+  const emailEmisor = registrosAprobados[0][2];
   const razonDeCompra = registrosAprobados[0][3];
   const fechaSolicitud = registrosAprobados[0][4];
   const prioridad = registrosAprobados[0][5];
@@ -1074,7 +1075,7 @@ function obtenerCorreosCompras() {
 }
 
 
-//Determinar el destinatario
+//Determinar el destinatario / persona que aprobará la solicitud 
 function determinarDestinatario(totalCompra, formatoSolicitante) {
 
   //Verificar el código del cargo del solicitante 
@@ -1267,17 +1268,17 @@ function seguimientoSolicitudPorId(solicitudId) {
     //var formatSolicitante = transformarData(solicitanteData); formatSolicitante
     aprobadores.push({
       nombreAprobador: formatSolicitante.solicitante.names,
-      cargo: formatSolicitante.formatSolicitante.cargo,
+      cargo: formatSolicitante.solicitante.cargo,
       fecha: registrosSolicitud[0][17] ? registrosSolicitud[0][17] : '',
       estado: registrosSolicitud[0][15]
     })
 
     // Cargamos al gerente general
-    var gerenteGeneral = cargarDataUsers(formatSolicitante.jefe);
+    var gerenteGeneral = cargarDataUsers(formatSolicitante.solicitante.jefe);
     var gerenteGeneralTrans = transformarData(gerenteGeneral);
     aprobadores.push({
-      nombreAprobador: gerenteGeneralTrans.formatSolicitante.names,
-      cargo: gerenteGeneralTrans.formatSolicitante.cargo,
+      nombreAprobador: gerenteGeneralTrans.solicitante.names,
+      cargo: gerenteGeneralTrans.solicitante.cargo,
       fecha: registrosSolicitud[0][20] ? registrosSolicitud[0][20] : '',
       estado: registrosSolicitud[0][18]
     })

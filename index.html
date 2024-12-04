@@ -405,16 +405,19 @@
       </div>
 
       <!-- Modal de resultado -->
-      <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+      <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="false">
+        <!-- Cambiar a false -->
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="resultModalLabel">Resultado</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                id="closeResultModalBtn"></button>
             </div>
             <div class="modal-body" id="modalMessage"></div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                id="closeResultModalFooterBtn">Cerrar</button>
             </div>
           </div>
         </div>
@@ -502,11 +505,6 @@
 
 <!-- FOOTER (siempre visible) -->
 <footer class="footer">
-  <div class="container footer-container">
-    <div class="footer-image" style="background-image: url('./img/footerOne.webp')">
-      <!-- Imagen de footer -->
-    </div>
-  </div>
   <div class="container">
     <p>&copy; 2024 ALFRED H KNIGHT. Todos los derechos reservados.</p>
   </div>

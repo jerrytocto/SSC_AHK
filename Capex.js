@@ -41,7 +41,7 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   var solicitante = cargarDataUsersPorEmail(usuarioEmail);
   console.log("Solicitante: " + solicitante);
 
-  if(solicitante) {
+  if (solicitante) {
     var formatSolicitante = transformarData(solicitante);
     var mostrarUsuarioCapex = formatSolicitante.solicitante.names + " - " + formatSolicitante.solicitante.cargo;
   } else {
@@ -66,7 +66,7 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   body.replaceText("{{dia}}", dia);
   body.replaceText("{{mes}}", mes);
   body.replaceText("{{anio}}", anio);
-  body.replaceText("{{razonCompra}}", razonCompra.toUpperCase());
+  //body.replaceText("{{razonCompra}}", razonCompra.toUpperCase());
   body.replaceText("{{observaciones}}", observaciones);
 
   if (conFirma) {
@@ -88,35 +88,39 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   // Crear un bloque de texto repetible
   var productContent = "";
   var descripAllProducts = "";
+  var productTittleAll = "";
   for (var i = 0; i < registrosAprobados.length; i++) {
     var producto = registrosAprobados[i];
     var cantidad = producto[11];
     var centroDeCosto = producto[10];
     var equipo = producto[7];
     var marca = producto[8];
-    var especificaciones = producto[9];
+    var especificaciones = normalizarEspecificaciones(producto[9]);
     var precio = producto[12];
     var subtotal = producto[13];
 
-    var productEntry = + cantidad + "  " + equipo.toUpperCase() + marca.toUpperCase() + ((i + 1 < registrosAprobados.length) ? "," : "");
-
+    var productEntry = + cantidad + "  " + equipo.toUpperCase() + " " + marca.toUpperCase() + ((i + 1 < registrosAprobados.length) ? " ," : "");
+    var producTittlePart = + cantidad + "  " + equipo.toUpperCase() + " " +  ((i + 1 < registrosAprobados.length) ? " ," : "");
     // Formato del descripAllProductsEntry
-    var descripAllProductsEntry = centroDeCosto.toUpperCase() + "\n" + "- " + cantidad + " " + equipo + " " + marca + "  " + especificaciones + "\n" +
-      "    " + "Unit Price: US$: " + precio + "\n" +
-      "    " + "Sub Total: US$: " + subtotal + "\n";
-
-    // Añadir saltos de línea entre productos
-    /*if (i + 1 < registrosAprobados.length) {
-      descripAllProductsEntry += "\n\n";
-    }*/
+    var descripAllProductsEntry = 
+      `Centro de costo: ${centroDeCosto.toUpperCase()}\n` +
+      `    - ${cantidad} ${equipo.toUpperCase()} | ${especificaciones}\n` +
+      `      Unit Price: US$: ${precio}\n` +
+      `      Sub Total: US$: ${subtotal}\n` +
+      `${i + 1 < registrosAprobados.length ? '--------------------------------------------------\n' : ''}`;
 
     productContent += productEntry;
+    productTittleAll += producTittlePart;
     descripAllProducts += descripAllProductsEntry;
   }
 
+  // Función para normalizar las especificaciones
+  function normalizarEspecificaciones(especificaciones) {
+    // Reemplazar saltos de línea, comas y puntos y comas con un espacio
+    return especificaciones.replace(/[\n,;]+/g, ' ').trim();
+  }
 
-
-  body.replaceText("{{PRODUCTOS}}", productContent);
+  body.replaceText("{{PRODUCTOS}}", productTittleAll);
   body.replaceText("{{DESCRIPTALLPRODUCTS}}", descripAllProducts);
 
   // Guardar el documento para obtener el enlace

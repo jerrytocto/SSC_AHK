@@ -351,7 +351,7 @@ function generarSolicitudId(sheetRegistro) {
     var lastId = sheetRegistro.getRange(lastRow, 1).getValue();
     return lastId + 1;
   }
-  return 1000;
+  return 28;
 }
 
 // Registra los productos en la base de datos (google sheet)
@@ -807,7 +807,7 @@ function enviarCorreoGerenteGeneral(
     } else {
       asunto = "Nueva Solicitud de Compra";
     }
-  }
+  } 
 
   var html = htmlTemplate.evaluate().getContent();
 

@@ -37,6 +37,7 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   var solicitudId = registrosAprobados[0][0];
   var observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
   var usuarioEmail = registrosAprobados[0][2];
+  var descriptionCompra = registrosAprobados[0][23] ? registrosAprobados[0][23] : ""; 
 
   var solicitante = cargarDataUsersPorEmail(usuarioEmail);
   console.log("Solicitante: " + solicitante);
@@ -58,6 +59,7 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   // Reemplazar datos generales en el documento
   var body = doc.getBody();
   //body.replaceText("{{solicitante}}", solicitante);
+  body.replaceText("{{descripcionCompra}}", descriptionCompra);
   body.replaceText("{{justificacion}}", justificacion);
   body.replaceText("{{prioridad}}", prioridad);
   body.replaceText("{{totalCompra}}", totalCompra.toFixed(2));
@@ -86,9 +88,8 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
   var productTemplate = blockText.replace(productosPlaceholder, "").replace("{{/productos}}", "");
 
   // Crear un bloque de texto repetible
-  var productContent = "";
+  //var productContent = "";
   var descripAllProducts = "";
-  var productTittleAll = "";
   for (var i = 0; i < registrosAprobados.length; i++) {
     var producto = registrosAprobados[i];
     var cantidad = producto[11];
@@ -98,19 +99,19 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
     var especificaciones = normalizarEspecificaciones(producto[9]);
     var precio = producto[12];
     var subtotal = producto[13];
+    var justifyCompra = producto[22] ? producto[22] : "";
 
-    var productEntry = + cantidad + "  " + equipo.toUpperCase() + " " + marca.toUpperCase() + ((i + 1 < registrosAprobados.length) ? " ," : "");
-    var producTittlePart = + cantidad + "  " + equipo.toUpperCase() + " " +  ((i + 1 < registrosAprobados.length) ? " ," : "");
+    //var productEntry = + cantidad + "  " + equipo.toUpperCase() + " " + marca.toUpperCase() + ((i + 1 < registrosAprobados.length) ? " ," : "");
     // Formato del descripAllProductsEntry
     var descripAllProductsEntry = 
       `Centro de costo: ${centroDeCosto.toUpperCase()}\n` +
-      `    - ${cantidad} ${equipo.toUpperCase()} | ${especificaciones}\n` +
+      `    - ${cantidad} ${equipo.toUpperCase()} ${marca.toUpperCase()} (${justifyCompra})
+             ${especificaciones}\n` +
       `      Unit Price: US$: ${precio}\n` +
       `      Sub Total: US$: ${subtotal}\n` +
       `${i + 1 < registrosAprobados.length ? '--------------------------------------------------\n' : ''}`;
 
-    productContent += productEntry;
-    productTittleAll += producTittlePart;
+    //productContent += productEntry;
     descripAllProducts += descripAllProductsEntry;
   }
 
@@ -120,7 +121,6 @@ function generateCapex(totalCompra, registrosAprobados, aprobadoresEmail, conFir
     return especificaciones.replace(/[\n,;]+/g, ' ').trim();
   }
 
-  body.replaceText("{{PRODUCTOS}}", productTittleAll);
   body.replaceText("{{DESCRIPTALLPRODUCTS}}", descripAllProducts);
 
   // Guardar el documento para obtener el enlace

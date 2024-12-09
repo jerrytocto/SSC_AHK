@@ -573,6 +573,7 @@
     const productPrice = document.getElementById("productPriceModal").value.trim();
     const productSpecs = document.getElementById("productSpecsModal").value.trim();
     const productCentroCostos = document.getElementById("productCentroCosto").value.trim();
+    const justifyCompraProd = document.getElementById("justifyCompraProdModal").value.trim();
 
     // Verifica que los campos del modal de añadirProducto tengan contenido para poder añadir a la tabla
     if (productName && productBrand && productQuantity && productPrice && productCentroCostos !== "" && productSpecs) {
@@ -590,12 +591,13 @@
       productTable.appendChild(newRow);
 
       //Añadir cada uno de los campos del formulario a los inputs ocultos
-      document.getElementById("productNames").value += `${productName},`;
-      document.getElementById("productBrands").value += `${productBrand},`;
-      document.getElementById("productQuantities").value += `${productQuantity},`;
-      document.getElementById("productPrices").value += `${productPrice},`;
-      document.getElementById("productSpecs").value += `${productSpecs},`;
-      document.getElementById("productCentroCostos").value += `${productCentroCostos},`;
+      document.getElementById("productNames").value += `${productName}/`;
+      document.getElementById("productBrands").value += `${productBrand}/`;
+      document.getElementById("productQuantities").value += `${productQuantity}/`;
+      document.getElementById("productPrices").value += `${productPrice}/`;
+      document.getElementById("productSpecs").value += `${productSpecs}/`;
+      document.getElementById("productCentroCostos").value += `${productCentroCostos}/`;
+      document.getElementById("justifyCompraProds").value += `${justifyCompraProd}/`;
 
       // Limpiar los campos del modal
       clearProductModal();
@@ -620,6 +622,7 @@
     document.getElementById("productPriceModal").value = '';
     document.getElementById("productSpecsModal").value = '';
     document.getElementById("productCentroCosto").value = '';
+    document.getElementById("justifyCompraProdModal").value = '';
   }
 
 

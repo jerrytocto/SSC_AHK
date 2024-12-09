@@ -361,6 +361,7 @@ function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, for
   var productos = obtenerDatosProductos(form);
 
   var observaciones = form.observaciones ? form.observaciones : "";
+  
 
   productos.forEach((producto) => {
     var subtotal = calcularSubtotal(producto.cantidad, producto.precio);
@@ -392,13 +393,15 @@ function registrarProductos(form, solicitudId, sheetRegistro, cotizacionUrl, for
     if (totalCompra <= 500) {
       var jefeArea = determinarDestinatario(totalCompra, formatSolicitante);
 
-      fila.push("Pendiente", jefeArea.solicitante.email, "", "", "", "", cotizacionUrl);
+      fila.push("Pendiente", jefeArea.solicitante.email, "", "", "", "", cotizacionUrl, producto.justifyCompraProds, form.DescriptCompra);
     } else {
       var primerAprobador = determinarDestinatario(totalCompra, formatSolicitante);
       var segundoAprobador = determinarDestinatario(totalCompra, primerAprobador);
-      fila.push("Pendiente", primerAprobador.solicitante.email, "", "Pendiente", segundoAprobador.solicitante.email, "", cotizacionUrl);
+      fila.push("Pendiente", primerAprobador.solicitante.email, "", "Pendiente", segundoAprobador.solicitante.email, "", cotizacionUrl, producto.justifyCompraProds,form.DescriptCompra);
     }
     sheetRegistro.appendRow(fila);
+    console.log("Fila de la hoja de registro: " + fila);
+    console.log(fila);
   });
 
   return totalCompra;
@@ -451,12 +454,14 @@ function obtenerColumnaEstado(totalCompra, solicitudId, numberAprobadores) {
 // Extrae los datos de los productos del evento POST
 function obtenerDatosProductos(form) {
 
-  var nombres = limpiarCadena(form["productNames[]"]).split(",");
-  var marcas = limpiarCadena(form["productBrands[]"]).split(",");
-  var cantidades = limpiarCadena(form["productQuantities[]"]).split(",");
-  var precios = limpiarCadena(form["productPrices[]"]).split(",");
-  var especificaciones = limpiarCadena(form["productSpecs[]"]).split(",");
-  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split(",");
+  var nombres = limpiarCadena(form["productNames[]"]).split("/");
+  var marcas = limpiarCadena(form["productBrands[]"]).split("/");
+  var cantidades = limpiarCadena(form["productQuantities[]"]).split("/");
+  var precios = limpiarCadena(form["productPrices[]"]).split("/");
+  var especificaciones = limpiarCadena(form["productSpecs[]"]).split("/");
+  var centroCostos = limpiarCadena(form["productCentroCostos[]"]).split("/");
+  var justifyCompraProds = limpiarCadena(form["justifyCompraProds[]"]).split("/");
+
 
   return nombres.map((nombre, i) => ({
     nombre: nombre,
@@ -464,14 +469,15 @@ function obtenerDatosProductos(form) {
     cantidad: parseFloat(cantidades[i]) || 0,
     precio: parseFloat(precios[i]) || 0,
     especificaciones: especificaciones[i] || "",
-    centroCosto: centroCostos[i] || ""
+    centroCosto: centroCostos[i] || "",
+    justifyCompraProds: justifyCompraProds[i] || ""
   }));
 }
 function limpiarCadena(cadena) {
   if (cadena == undefined || cadena == null) {
     return "";
   }
-  return cadena.replace(/,\s*$/, "");
+  return cadena.replace(/\/\s*$/, "");
 }
 
 // Calcula el subtotal de un producto
@@ -740,7 +746,7 @@ function agregarLinkCapexFirmado(idSolicitud, nuevoCapexLink) {
 
   for (var i = 0; i < data.length; i++) {
     if (data[i][0] === idSolicitud) {
-      sheet.getRange(i + 1, 24).setValue(nuevoCapexLink);
+      sheet.getRange(i + 1, 26).setValue(nuevoCapexLink);
     }
   }
 }
@@ -764,6 +770,7 @@ function enviarCorreoGerenteGeneral(
   htmlTemplate.justificacion = registrosAprobados[0][6];
   htmlTemplate.centroDeCosto = registrosAprobados[0][10];
   htmlTemplate.observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
+  htmlTemplate.descriptionCompra = registrosAprobados[0][23];
   htmlTemplate.tablaSolicitud = registrosAprobados;
   htmlTemplate.numberAprobadores = 2;
   htmlTemplate.scriptUrl = scriptUrl; // Pasar la URL del script a la plantilla
@@ -794,7 +801,7 @@ function enviarCorreoGerenteGeneral(
 
       asunto = "Nueva Solicitud de Compra Aprobada";
     } else {
-      var capexUrl = registrosAprobados[0][22];
+      var capexUrl = registrosAprobados[0][24];
       var capex = obtenerCapexSinFirmarDeDrive(capexUrl);
       if (capex) {
         adjuntos.push(capex);
@@ -807,7 +814,7 @@ function enviarCorreoGerenteGeneral(
     } else {
       asunto = "Nueva Solicitud de Compra";
     }
-  } 
+  }
 
   var html = htmlTemplate.evaluate().getContent();
 
@@ -843,7 +850,7 @@ function actualizarHojaConEnlaceCapex(solicitudId, enlaceCapex) {
   for (var i = 0; i < data.length; i++) {
     if (String(data[i][0]) === String(solicitudId)) {
       actualizaciones.push({
-        range: sheet.getRange(i + 1, 23),
+        range: sheet.getRange(i + 1, 25),
         value: enlaceCapex
       });
     }
@@ -933,6 +940,7 @@ function enviarCorreoCompras(
   htmlTemplate.justificacion = registrosAprobados[0][6];
   htmlTemplate.centroDeCosto = registrosAprobados[0][10];
   htmlTemplate.observaciones = registrosAprobados[0][14] ? registrosAprobados[0][14] : "";
+  htmlTemplate.descriptionCompra = registrosAprobados[0][23];
   htmlTemplate.tablaSolicitud = registrosAprobados;
   htmlTemplate.aprobadoresEmail = aprobadoresEmail;
   htmlTemplate.mostrarCampoAprobador = 1;
@@ -992,6 +1000,7 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
   htmlTemplate.razonDeCompra = filteredData[0][3];
   htmlTemplate.fechaSolicitud = filteredData[0][4];
   htmlTemplate.justificacion = filteredData[0][6];
+  htmlTemplate.descriptionCompra = filteredData[0][23];
   htmlTemplate.centroDeCosto = filteredData[0][10];
   htmlTemplate.observaciones = filteredData[0][14] ? filteredData[0][14] : "";
   htmlTemplate.mostrarCampoAprobador = 0;

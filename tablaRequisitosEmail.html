@@ -142,8 +142,9 @@
         <h4 class="card-title text-center">Solicitud de Compra N°<span>
             <?= solicitudId; ?>
           </span></h4>
-        <p class="card-text">
-          <?= justificacion; ?>
+        <p class="card-text"><b>
+            <?= descriptionCompra; ?>
+          </b>
         </p>
       </div>
       <ul class="list-group list-group-flush">
@@ -160,9 +161,9 @@
         </li>
         <li class="list-group-item">
           <div class="row">
-            <div class="col-sm-6"><span class="font-weight-bold"><b>Centro de Costo:</b></span>
+            <div class="col-sm-6"><span class="font-weight-bold"><b>Justifiación General:</b></span>
               <b>
-                <?= centroDeCosto?>
+                <?= justificacion?>
               </b>
             </div>
             <div class="col-sm-6"><span class="font-weight-bold"><b>Fecha:</b></span>
@@ -182,6 +183,7 @@
               <th scope="col">Producto</th>
               <th scope="col">Marca</th>
               <th scope="col">Especificaciones</th>
+              <th scope="col">Justificación de Compra</th>
               <th scope="col"> Centro de costo </th>
               <th scope="col">Cantidad</th>
               <th scope="col">Precio</th>
@@ -192,10 +194,29 @@
             <? var total = 0; ?>
             <? for (var i = 0; i < tablaSolicitud.length; i++) { ?>
             <tr>
+              <!-- Número de fila -->
               <th scope="row">
-                <?= (i+1); ?>
+                <?= (i + 1); ?>
               </th>
-              <? for (var j = 7; j < 14 ; j++) { ?>
+
+              <!-- Producto, Marca, Especificaciones (posición fija en columnas 7, 8, 9) -->
+              <? for (var j = 7; j < 10; j++) { ?>
+              <td>
+                <?= tablaSolicitud[i][j]; ?>
+              </td>
+              <? } ?>
+
+              <!-- Justificación de Compra (columna 22) -->
+              <td>
+                <? if (tablaSolicitud[i][22] !== undefined && tablaSolicitud[i][22] !== null) { ?>
+                <?= tablaSolicitud[i][22]; ?>
+                <? } else { ?>
+                ---
+                <? } ?>
+              </td>
+
+              <!-- Centro de costo, Cantidad, Precio, Subtotal (columnas 10, 11, 12, 13) -->
+              <? for (var j = 10; j < 14; j++) { ?>
               <td>
                 <?= tablaSolicitud[i][j]; ?>
               </td>
@@ -206,7 +227,7 @@
           <? if (totalCompra) { ?>
           <tfoot>
             <tr class="total-row">
-              <td colspan="7" class="text-right font-weight-bold">Total de la Compra:</td>
+              <td colspan="8" class="text-right font-weight-bold">Total de la Compra:</td>
               <td>
                 <?= totalCompra; ?>
               </td>
@@ -220,7 +241,7 @@
         <p>Seleccione una opción para esta solicitud:</p>
         <a href="<?= scriptUrl ?>?solicitudId=<?= solicitudId ?>&estado=Aprobado&aprobadoresEmail=<?= aprobadoresEmail ?>&numberAprobadores=<?= numberAprobadores ?>"
           class="btn btn-success">Aprobar</a>
-        
+
         <a href="<?= scriptUrl ?>?solicitudId=<?= solicitudId ?>&estado=Desaprobado&aprobadoresEmail=<?= aprobadoresEmail ?>&numberAprobadores=<?= numberAprobadores ?>"
           class="btn btn-danger">Desaprobar</a>
         <? } ?>

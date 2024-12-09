@@ -14,6 +14,7 @@
       var productPrice = $('#productPrice').val();
       var productSpec = $('#productSpec').val();
       var productCentroCosto = $('#productCentroCosto').val();
+      var justifyCompraProd = $('#justifyCompraProd').val();
 
       
       // Verificar si todos los campos están rellenos
@@ -21,7 +22,7 @@
         // Si algún campo está vacío, mostrar un mensaje de error y salir de la función
         alert('Por favor, complete todos los campos para agregar un producto.');
         return;
-      } 
+      }
 
       // Validar que la cantidad sea mayor que 0
       if (productQuantity <= 0) {
@@ -78,6 +79,7 @@
       $('#productPrice').val('');
       $('#productSpec').val('');
       $('#productCentroCosto').val('');
+      $('#justifyCompraProd').val('');
     });
   });
 </script>

@@ -37,6 +37,7 @@
         // Limpiar textareas
         document.getElementById('justificacion').value = '';
         document.getElementById('observaciones').value = '';
+        document.getElementById('justifyCompraProd').value = '';
 
         // Limpiar tabla de productos
         const productTable = document.getElementById('productTable');
@@ -45,7 +46,7 @@
         }
 
         // Limpiar campos ocultos de productos
-        const hiddenInputs = ['productNames', 'productBrands', 'productQuantities', 'productPrices', 'productSpecs', 'productCentroCostos'];
+        const hiddenInputs = ['productNames', 'productBrands', 'productQuantities', 'productPrices', 'productSpecs', 'productCentroCostos', 'justifyCompraProds'];
         hiddenInputs.forEach(id => {
           const element = document.getElementById(id);
           if (element) {

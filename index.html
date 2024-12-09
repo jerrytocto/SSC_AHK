@@ -305,6 +305,12 @@
           <h4 class="text-center"> Nueva Solicitud de Compra</h4>
           <form onsubmit="enviarform(event, this)">
             <div class="row">
+              <div class="col-md-6">
+                <label for="DescriptCompra" class="form-label">Descripcion de la Compra * </label>
+                <textarea class="form-control" id="DescriptCompra" name="DescriptCompra"
+                  placeholder="Descripción general de la compra a realizar" required style="height: 70px"></textarea>
+              </div>
+
               <div class="col-md-3">
                 <label for="razonCompra" class="form-label">Razón para la compra *</label>
                 <select id="razonCompra" class="form-select" name="razonCompra" required>
@@ -319,7 +325,12 @@
                   <option>Laboratorio</option>
                 </select>
               </div>
-
+            </div>
+            <div class="row">
+              <div class="mb-3 col-md-6">
+                <label for="file" class="form-label">Subir Cotización (PDF)</label>
+                <input type="file" class="form-control" id="file" name="file" accept="application/pdf">
+              </div>
               <div class="col-md-3">
                 <label for="inputState" class="form-label">Prioridad *</label>
                 <select id="inputState" class="form-select" name="prioridad" required>
@@ -328,11 +339,6 @@
                   <option>Media</option>
                   <option>Baja</option>
                 </select>
-              </div>
-
-              <div class="mb-3 col-md-6">
-                <label for="file" class="form-label">Subir Cotización (PDF)</label>
-                <input type="file" class="form-control" id="file" name="file" accept="application/pdf">
               </div>
             </div>
             <div class="row mt-2">
@@ -373,6 +379,7 @@
               </thead>
               <tbody id="productTable">
                 <input type="hidden" id="productNames" name="productNames[]">
+                <input type="hidden" id="justifyCompraProds" name="justifyCompraProds[]">
                 <input type="hidden" id="productBrands" name="productBrands[]">
                 <input type="hidden" id="productQuantities" name="productQuantities[]">
                 <input type="hidden" id="productPrices" name="productPrices[]">
@@ -438,6 +445,10 @@
           <div class="mb-3">
             <label for="productNameModal" class="form-label">Producto *</label>
             <input type="text" class="form-control" id="productNameModal" required>
+          </div>
+          <div class="mb-3">
+            <label for="productNameModal" class="form-label">Justificación de Compra</label>
+            <input type="text" class="form-control" id="justifyCompraProdModal" placeholder="Por ejem: Ingreso de personal, renovación equipo">
           </div>
           <div class="mb-3">
             <label for="productBrandModal" class="form-label">Marca *</label>

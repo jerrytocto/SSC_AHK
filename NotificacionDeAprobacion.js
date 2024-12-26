@@ -27,13 +27,13 @@ function procesarSolicitud(solicitud, columnaEstado, rowIndex) {
     if (columnaEstado == 15) {
         // Estado pendiente en la columna 15 (aprobación por el gerente de área)
         fechaComparacion = new Date(solicitud[4]); // Fecha de emisión de la solicitud
-        fechaUltimaNotificacion = solicitud[24] || null; // Columna 25, índice 24
-        contadorNotificaciones = solicitud[25] || 0;     // Columna 26, índice 25
+        fechaUltimaNotificacion = solicitud[26] || null; // Columna 26, índice 25
+        contadorNotificaciones = solicitud[27] || 0;     // Columna 26, índice 25
     } else if (columnaEstado == 18) {
         // Estado pendiente en la columna 18 (aprobación por el gerente general)
         fechaComparacion = new Date(solicitud[17]); // Fecha de aprobación por el gerente de área
-        fechaUltimaNotificacion = solicitud[26] || null; // Columna 27, índice 26
-        contadorNotificaciones = solicitud[27] || 0;     // Columna 28, índice 27
+        fechaUltimaNotificacion = solicitud[28] || null; // Columna 27, índice 26
+        contadorNotificaciones = solicitud[29] || 0;     // Columna 28, índice 27
     }
 
     // Determinar si se debe enviar una notificación
@@ -56,11 +56,11 @@ function actualizarRegistroNotificacion(sheet, rowIndex, fechaActual, contador, 
     var fechaNotificacionCol, contadorCol;
 
     if (columnaEstado == 15) {
-        fechaNotificacionCol = 25; // Columna para "Fecha Última Notificación (Gerente Área)"
-        contadorCol = 26;          // Columna para "Contador Notificaciones (Gerente Área)"
+        fechaNotificacionCol = 27; // Columna para "Fecha Última Notificación (Gerente Área)"
+        contadorCol = 28;          // Columna para "Contador Notificaciones (Gerente Área)"
     } else if (columnaEstado == 18) {
-        fechaNotificacionCol = 27; // Columna para "Fecha Última Notificación (Gerente General)"
-        contadorCol = 28;          // Columna para "Contador Notificaciones (Gerente General)"
+        fechaNotificacionCol = 29; // Columna para "Fecha Última Notificación (Gerente General)"
+        contadorCol = 30;          // Columna para "Contador Notificaciones (Gerente General)"
     }
 
     // Verificar y crear encabezados si las columnas no tienen encabezados
@@ -96,7 +96,7 @@ function actualizarRegistroNotificacion(sheet, rowIndex, fechaActual, contador, 
 function calcularTiempoTranscurrido(fechaAnterior, fechaVerificacion) {
     var diferencia = fechaVerificacion.getTime() - fechaAnterior.getTime();
     var diasTranscurridos = diferencia / (1000 * 60 * 60 * 24);
-    return diasTranscurridos >= 7; // 7 días para todas las notificaciones
+    return diasTranscurridos >= 2; // 2 días para todas las notificaciones
 }
 
 

@@ -459,7 +459,7 @@
 
 
   //Función para mostrar el seguimiento de la solicitud
-  function mostrarSeguimientoSolicitud(id) {
+  function handleGoogleLogin(id) {
 
     // Mostrar un indicador de carga
     $('#detalleModal .modal-content').html('<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Cargando...</span></div></div>');
@@ -583,6 +583,7 @@
           <td>${productBrand}</td>
           <td>${productQuantity}</td>
           <td>${productPrice}</td>
+          <td>${justifyCompraProd}</td>
           <td>${productSpecs}</td>
           <td>${productCentroCostos}</td>
         `;

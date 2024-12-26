@@ -780,7 +780,7 @@ function enviarCorreoGerenteGeneral(
   htmlTemplate.aprobadoresEmail = formatoSolicitante.solicitante.jefe;
   htmlTemplate.nombreCargoAprobador = nombreAreaGA;
   htmlTemplate.mostrarCampoAprobador = 1;
-  htmlTemplate.paraAprobar = !esNotificacion;
+  htmlTemplate.paraAprobar = true ;
   htmlTemplate.totalCompra = totalCompra.toFixed(2);
 
   var adjuntos = [];
@@ -799,20 +799,20 @@ function enviarCorreoGerenteGeneral(
         adjuntos.push(capex.pdf);
       }
 
-      asunto = "Nueva Solicitud de Compra Aprobada";
+      asunto = "Nueva Solicitud de Compra para Aprobar";
     } else {
       var capexUrl = registrosAprobados[0][24];
       var capex = obtenerCapexSinFirmarDeDrive(capexUrl);
       if (capex) {
         adjuntos.push(capex);
       }
-      asunto = `Notificación de aprobación para la compra con ID ${htmlTemplate.solicitudId}`;
+      asunto = `¡PENDIENTE DE APROBACIÓN! SOLICITUD DE COMPRA N°${htmlTemplate.solicitudId}`;
     }
   } else {
     if (esNotificacion) {
-      asunto = `Notificación de aprobación para la compra con ID ${htmlTemplate.solicitudId}`;
+      asunto =  `¡PENDIENTE DE APROBACIÓN! SOLICITUD DE COMPRA N°${htmlTemplate.solicitudId}`;
     } else {
-      asunto = "Nueva Solicitud de Compra";
+      asunto = "Nueva Solicitud de Compra para Aprobar";
     }
   }
 

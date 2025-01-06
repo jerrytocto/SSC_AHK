@@ -351,7 +351,7 @@ function generarSolicitudId(sheetRegistro) {
     var lastId = sheetRegistro.getRange(lastRow, 1).getValue();
     return lastId + 1;
   }
-  return 28;
+  return 1;
 }
 
 // Registra los productos en la base de datos (google sheet)
@@ -760,7 +760,8 @@ function enviarCorreoGerenteGeneral(
   esNotificacion
 ) {
   var htmlTemplate = HtmlService.createTemplateFromFile("tablaRequisitosEmail");
-  var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  //var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  var scriptUrl = obtenerUrl();
 
   // Configuración del template HTML
   htmlTemplate.solicitudId = registrosAprobados[0][0];
@@ -931,7 +932,8 @@ function enviarCorreoCompras(
   cotizacionUrl
 ) {
   var htmlTemplate = HtmlService.createTemplateFromFile("tablaRequisitosEmail");
-  var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  //var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  var scriptUrl = obtenerUrl();
 
   htmlTemplate.solicitudId = registrosAprobados[0][0];
   htmlTemplate.emisor = registrosAprobados[0][1];
@@ -991,7 +993,8 @@ function enviarEmail(totalCompra, solicitudId, formatSolicitante, esAviso) {
   var filteredData = obtenerUltimosRegistros(solicitudId);
 
   var htmlTemplate = HtmlService.createTemplateFromFile("tablaRequisitosEmail");
-  var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  //var scriptUrl = ScriptApp.getService().getUrl(); // Obtén la URL del script
+  var scriptUrl = obtenerUrl();
 
   htmlTemplate.tablaSolicitud = filteredData;
   htmlTemplate.totalCompra = totalCompra ? totalCompra.toFixed(2) : "0.00";
@@ -1394,4 +1397,15 @@ function transformarData(data) {
     }
   };
   return formatSolicitante;
+}
+
+//Función que extrae la url del proyecto 
+function obtenerUrl(){
+  var scriptUrl = PropertiesService.getScriptProperties().getProperty('SCRIPT_URL');
+
+  if(!scriptUrl){
+    throw new Error("La url del proyecto no está configurada. Ejecute guardarUrlScript() después del despliegue.")
+  }
+
+  return scriptUrl;
 }
